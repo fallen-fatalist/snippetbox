@@ -3,19 +3,21 @@ package httpserver
 import (
 	"html/template"
 	"path/filepath"
+	"time"
+
+	"github.com/fallen-fatalist/snippetbox/internal/entities"
 )
 
 type templateData struct {
-	Snippets []viewSnippet
-	Snippet  viewSnippet
+	CurrentYear int
+	Snippets    []entities.Snippet
+	Snippet     entities.Snippet
 }
 
-type viewSnippet struct {
-	ID      int
-	Title   string
-	Content string
-	Created string
-	Expires string
+func NewTemplateData() templateData {
+	return templateData{
+		CurrentYear: time.Now().Year(),
+	}
 }
 
 // Page names
@@ -36,12 +38,12 @@ func NewTemplateCache() (map[string]*template.Template, error) {
 	for _, page := range pages {
 		name := filepath.Base(page)
 
-		ts, err := template.ParseFiles("./ui/html/base.html")
+		ts, err := template.New(name).Funcs(functions).ParseFiles("./ui/html/base.html")
 		if err != nil {
 			return nil, err
 		}
 
-		ts, err = ts.ParseGlob("./ui/html/partials/*.tmpl")
+		ts, err = ts.ParseGlob("./ui/html/partials/*.html")
 		if err != nil {
 			return nil, err
 		}
@@ -55,4 +57,12 @@ func NewTemplateCache() (map[string]*template.Template, error) {
 	}
 
 	return cache, nil
+}
+
+func humanDate(t time.Time) string {
+	return t.Format("02 Jan 2006 at 15:04")
+}
+
+var functions = template.FuncMap{
+	"humanDate": humanDate,
 }
