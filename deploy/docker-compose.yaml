@@ -20,6 +20,8 @@ services:
     image: postgres:15
     container_name: snippetbox-db
     environment:
+      - TZ=Asia/Almaty
+      - PGTZ=Asia/Almaty
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=snippetbox
