@@ -19,10 +19,10 @@ func Run() {
 	var server server.Server = httpserver.NewApp(logger, cfg)
 
 	// Log server start
-	logger.Info("Starting server", slog.Any("address", server.Config().Address))
+	logger.Info("Starting server", slog.Any("address", server.Config().Port))
 
 	// Launch server
-	err := http.ListenAndServe(server.Config().Address, server.Routes())
+	err := http.ListenAndServe(":"+server.Config().Port, server.Routes())
 
 	// In case of error server start log it
 	logger.Error(err.Error())

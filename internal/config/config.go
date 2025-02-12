@@ -5,15 +5,15 @@ import (
 )
 
 type Config struct {
-	Address   string
+	Port      string
 	StaticDir string
 }
 
 func MustConfigLoad() *Config {
 	cfg := Config{}
 
-	cfg.Address = *flag.String("addr", ":4000", "HTTP network address")
-	cfg.StaticDir = *flag.String("static-dir", "./ui/static/", "Path to the static assets directory")
+	flag.StringVar(&cfg.Port, "port", "4000", "Server port")
+	flag.StringVar(&cfg.StaticDir, "static-dir", "./ui/static/", "Path to the static assets directory")
 
 	flag.Parse()
 
