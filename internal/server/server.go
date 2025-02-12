@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/fallen-fatalist/snippetbox/internal/config"
-	"github.com/fallen-fatalist/snippetbox/internal/repository"
+	"github.com/fallen-fatalist/snippetbox/internal/service"
 )
 
 type Application interface {
@@ -20,6 +20,6 @@ type Application interface {
 	Routes() *http.ServeMux
 	// Logger
 	Logger() *slog.Logger
-	// Database
-	SnippetRepository() *repository.SnippetRepository
+	// Service
+	Service() service.Service
 }

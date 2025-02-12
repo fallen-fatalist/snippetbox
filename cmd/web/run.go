@@ -11,6 +11,8 @@ import (
 	"github.com/fallen-fatalist/snippetbox/internal/repository/postgres"
 	"github.com/fallen-fatalist/snippetbox/internal/server"
 	"github.com/fallen-fatalist/snippetbox/internal/server/httpserver"
+	"github.com/fallen-fatalist/snippetbox/internal/service"
+	"github.com/fallen-fatalist/snippetbox/internal/service/serviceinstance"
 
 	_ "github.com/lib/pq"
 )
@@ -38,11 +40,24 @@ func Run() {
 		log.Fatal(err)
 	}
 
+	// Initialize the services
+	snippetServiceInstance, err := serviceinstance.NewSnippetService(snippetRepositoryInstance)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Initialize general service
+	var generalService service.Service
+	generalService, err = serviceinstance.NewService(snippetServiceInstance)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Initialize the app
 	var app server.Application = httpserver.NewApp(
 		logger,
 		cfg,
-		&snippetRepositoryInstance,
+		generalService,
 	)
 
 	// Log server start

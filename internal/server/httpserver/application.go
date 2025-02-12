@@ -4,20 +4,20 @@ import (
 	"log/slog"
 
 	"github.com/fallen-fatalist/snippetbox/internal/config"
-	"github.com/fallen-fatalist/snippetbox/internal/repository"
+	"github.com/fallen-fatalist/snippetbox/internal/service"
 )
 
 type application struct {
-	logger            *slog.Logger
-	cfg               *config.Config
-	snippetRepository *repository.SnippetRepository
+	logger  *slog.Logger
+	cfg     *config.Config
+	service service.Service
 }
 
-func NewApp(logger *slog.Logger, cfg *config.Config, snippetRepository *repository.SnippetRepository) *application {
+func NewApp(logger *slog.Logger, cfg *config.Config, service service.Service) *application {
 	return &application{
-		logger:            logger,
-		cfg:               cfg,
-		snippetRepository: snippetRepository,
+		logger:  logger,
+		cfg:     cfg,
+		service: service,
 	}
 }
 
@@ -30,6 +30,6 @@ func (app *application) Logger() *slog.Logger {
 	return app.logger
 }
 
-func (app *application) SnippetRepository() *repository.SnippetRepository {
-	return app.snippetRepository
+func (app *application) Service() service.Service {
+	return app.service
 }
