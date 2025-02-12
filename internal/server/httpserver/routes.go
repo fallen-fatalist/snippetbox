@@ -2,7 +2,7 @@ package httpserver
 
 import "net/http"
 
-func (app *application) Routes() *http.ServeMux {
+func (app *application) Routes() http.Handler {
 
 	mux := http.NewServeMux()
 
@@ -12,8 +12,16 @@ func (app *application) Routes() *http.ServeMux {
 
 	// Endpoints
 	mux.HandleFunc("/", app.Home)
-	mux.HandleFunc("/snippet/view", app.SnippetView)
+	mux.HandleFunc("/snippet/view/{id}", app.SnippetView)
 	mux.HandleFunc("/snippet/create", app.SnippetCreate)
 
-	return mux
+	// Middlewares
+	// The request flow goes from bottom to up
+	panicCatchedMux := app.recoverPanic(mux)
+	loggedMux := app.requestLog(panicCatchedMux)
+	secureHeadersAppliedMux := secureHeaders(loggedMux)
+
+	//				//\\
+	//| from here to ||
+	return secureHeadersAppliedMux
 }

@@ -17,7 +17,7 @@ type Application interface {
 	// Config
 	Config() *config.Config
 	// Router
-	Routes() *http.ServeMux
+	Routes() http.Handler
 	// Logger
 	Logger() *slog.Logger
 	// Service
