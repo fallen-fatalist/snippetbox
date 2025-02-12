@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"text/template"
 
 	"github.com/fallen-fatalist/snippetbox/internal/repository"
 	"github.com/fallen-fatalist/snippetbox/internal/service"
@@ -26,27 +25,19 @@ func (app *application) Home(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, r, err)
 		return
 	}
+
+	data := templateData{}
 	for _, snippet := range snippets {
-		fmt.Fprintf(w, "%+v\n", snippet)
+		data.Snippets = append(data.Snippets, viewSnippet{
+			ID:      snippet.ID,
+			Title:   snippet.Title,
+			Content: snippet.Content,
+			Created: snippet.Created.Format("2006-01-02 15:04:05"),
+			Expires: snippet.Expires.Format("2006-01-02 15:04:05"),
+		})
 	}
 
-	files := []string{
-		"./ui/html/pages/home.html",
-		"./ui/html/base.html",
-		"./ui/html/partials/nav.html",
-	}
-
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, r, err)
-		return
-	}
-
-	err = ts.ExecuteTemplate(w, "base", nil)
-	if err != nil {
-		app.serverError(w, r, err)
-		return
-	}
+	app.render(w, r, http.StatusOK, homePage, data)
 }
 
 func (app *application) SnippetView(w http.ResponseWriter, r *http.Request) {
@@ -68,26 +59,18 @@ func (app *application) SnippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files := []string{
-		"./ui/html/base.html",
-		"./ui/html/partials/nav.html",
-		"./ui/html/pages/view.html",
-	}
-
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, r, err)
-		return
-	}
-
 	data := templateData{
-		Snippet: snippet,
+		Snippet: viewSnippet{
+			ID:      snippet.ID,
+			Title:   snippet.Title,
+			Content: snippet.Content,
+			Created: snippet.Created.Format("2006-01-02 15:04:05"),
+			Expires: snippet.Expires.Format("2006-01-02 15:04:05"),
+		},
 	}
 
-	err = ts.ExecuteTemplate(w, "base", data)
-	if err != nil {
-		app.serverError(w, r, err)
-	}
+	app.render(w, r, http.StatusOK, viewPage, data)
+
 }
 
 var ErrMethodNotAllowed = errors.New("http method not allowed")

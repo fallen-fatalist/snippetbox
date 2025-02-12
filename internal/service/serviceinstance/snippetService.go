@@ -37,7 +37,12 @@ func (s *snippetService) GetSnippetByID(snippetID int64) (entities.Snippet, erro
 		return entities.Snippet{}, service.ErrNegativeID
 	}
 
-	return s.repository.Get(snippetID)
+	snippet, err := s.repository.Get(snippetID)
+	if err != nil {
+		return entities.Snippet{}, err
+	}
+
+	return snippet, nil
 }
 
 func (s *snippetService) LatestSnippets(n int) ([]entities.Snippet, error) {

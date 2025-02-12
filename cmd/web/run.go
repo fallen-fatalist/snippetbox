@@ -19,11 +19,19 @@ import (
 
 // Actual main
 func Run() {
-	// Initialize config
-	cfg := config.MustConfigLoad()
-
 	// Initialize logger
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
+	// Initialize config
+	cfg := config.MustConfigLoad()
+	logger.Info("Config loaded successfully")
+
+	// Load html templages
+	cache, err := httpserver.NewTemplateCache()
+	if err != nil {
+		log.Fatal(err)
+	}
+	logger.Info("HTML cache loaded successfully")
 
 	// Open database connection
 	db, err := postgres.OpenDB(cfg.DSN())
@@ -31,7 +39,7 @@ func Run() {
 		log.Fatal(err)
 	}
 	defer db.Close()
-	logger.Info("Database successfully connected")
+	logger.Info("Database connected successfully")
 
 	// Initialize the repositories
 	var snippetRepositoryInstance repository.SnippetRepository
@@ -39,12 +47,14 @@ func Run() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	logger.Info("Repositories initialized successfully")
 
 	// Initialize the services
 	snippetServiceInstance, err := serviceinstance.NewSnippetService(snippetRepositoryInstance)
 	if err != nil {
 		log.Fatal(err)
 	}
+	logger.Info("Services initialized successfully")
 
 	// Initialize general service
 	var generalService service.Service
@@ -52,16 +62,18 @@ func Run() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	logger.Info("General service initialized successfully")
 
 	// Initialize the app
 	var app server.Application = httpserver.NewApp(
 		logger,
 		cfg,
 		generalService,
+		cache,
 	)
 
 	// Log server start
-	logger.Info("Server successfully started", slog.Any("address", app.Config().Port()))
+	logger.Info("Application successfully started", slog.Any("address", app.Config().Port()))
 
 	// Launch server
 	err = http.ListenAndServe(":"+app.Config().Port(), app.Routes())

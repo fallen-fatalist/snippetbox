@@ -1,6 +1,7 @@
 package httpserver
 
 import (
+	"html/template"
 	"log/slog"
 
 	"github.com/fallen-fatalist/snippetbox/internal/config"
@@ -8,16 +9,18 @@ import (
 )
 
 type application struct {
-	logger  *slog.Logger
-	cfg     *config.Config
-	service service.Service
+	logger        *slog.Logger
+	cfg           *config.Config
+	service       service.Service
+	templateCache map[string]*template.Template
 }
 
-func NewApp(logger *slog.Logger, cfg *config.Config, service service.Service) *application {
+func NewApp(logger *slog.Logger, cfg *config.Config, service service.Service, cache map[string]*template.Template) *application {
 	return &application{
-		logger:  logger,
-		cfg:     cfg,
-		service: service,
+		logger:        logger,
+		cfg:           cfg,
+		service:       service,
+		templateCache: cache,
 	}
 }
 
