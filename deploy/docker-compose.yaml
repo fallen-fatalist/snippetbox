@@ -1,0 +1,29 @@
+services:
+  app:
+    build: 
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: snippetbox-app 
+    container_name: snippetbox-app
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=db
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_NAME=snippetbox
+      - DB_PORT=5432
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    container_name: snippetbox-db
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=snippetbox
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./migrations:/docker-entrypoint-initdb.d
