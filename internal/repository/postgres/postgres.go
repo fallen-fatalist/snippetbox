@@ -11,7 +11,7 @@ import (
 func OpenDB(dsn string) (*sql.DB, error) {
 
 	// Retry logic: attempt to connect multiple times
-	maxRetries := 10                 // Try 6 times (30 seconds total if we wait 5 seconds between retries)
+	maxRetries := 3                  // Try 6 times (30 seconds total if we wait 5 seconds between retries)
 	retryInterval := 5 * time.Second // Retry every 5 seconds
 	var db *sql.DB
 	var err error
