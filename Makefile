@@ -1,8 +1,8 @@
 APP_NAME=snippetbox
-PORT=8080s
+PORT=8080
 
 run:
-	./bin/$(APP_NAME) --port $(PORT)
+	go run . --port $(PORT)
 
 build: 
 	go build -o ./bin/$(APP_NAME) .

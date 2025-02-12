@@ -7,7 +7,7 @@ func (app *application) Routes() *http.ServeMux {
 	mux := http.NewServeMux()
 
 	// Fileserver
-	fileServer := http.FileServer(neuteredFileSystem{http.Dir(app.cfg.StaticDir)})
+	fileServer := http.FileServer(neuteredFileSystem{http.Dir(app.cfg.StaticDir())})
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
 	// Endpoints

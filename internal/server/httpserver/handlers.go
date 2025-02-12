@@ -3,32 +3,9 @@ package httpserver
 import (
 	"fmt"
 	"html/template"
-	"log/slog"
 	"net/http"
 	"strconv"
-
-	"github.com/fallen-fatalist/snippetbox/internal/config"
 )
-
-type application struct {
-	logger *slog.Logger
-	cfg    *config.Config
-}
-
-func NewApp(logger *slog.Logger, cfg *config.Config) *application {
-	return &application{
-		logger: logger,
-		cfg:    cfg,
-	}
-}
-
-func (app *application) Config() *config.Config {
-	return app.cfg
-}
-
-func (app *application) Logger() *slog.Logger {
-	return app.logger
-}
 
 func (app *application) Home(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {

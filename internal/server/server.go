@@ -1,6 +1,7 @@
 package server
 
 import (
+	"database/sql"
 	"log/slog"
 	"net/http"
 
@@ -19,4 +20,6 @@ type Server interface {
 	Routes() *http.ServeMux
 	// Logger
 	Logger() *slog.Logger
+	// Database
+	DB() *sql.DB
 }
