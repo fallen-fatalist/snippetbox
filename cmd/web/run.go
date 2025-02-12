@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/fallen-fatalist/snippetbox/internal/config"
+	"github.com/fallen-fatalist/snippetbox/internal/repository"
+	"github.com/fallen-fatalist/snippetbox/internal/repository/snippetRepository"
 	"github.com/fallen-fatalist/snippetbox/internal/server"
 	"github.com/fallen-fatalist/snippetbox/internal/server/httpserver"
 
@@ -31,14 +33,26 @@ func Run() {
 	}
 	defer db.Close()
 	logger.Info("Database successfully connected")
-	// Initialize the server
-	var server server.Server = httpserver.NewApp(logger, cfg, db)
+
+	// Initialize the repositories
+	var snippetRepositoryInstance repository.SnippetRepository
+	snippetRepositoryInstance, err = snippetRepository.NewSnippetRepository(db)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Initialize the app
+	var app server.Application = httpserver.NewApp(
+		logger,
+		cfg,
+		&snippetRepositoryInstance,
+	)
 
 	// Log server start
-	logger.Info("Server successfully started", slog.Any("address", server.Config().Port()))
+	logger.Info("Server successfully started", slog.Any("address", app.Config().Port()))
 
 	// Launch server
-	err = http.ListenAndServe(":"+server.Config().Port(), server.Routes())
+	err = http.ListenAndServe(":"+app.Config().Port(), app.Routes())
 
 	// In case of error server start log it
 	logger.Error(err.Error())

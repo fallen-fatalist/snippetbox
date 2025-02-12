@@ -1,15 +1,15 @@
 package server
 
 import (
-	"database/sql"
 	"log/slog"
 	"net/http"
 
 	"github.com/fallen-fatalist/snippetbox/internal/config"
+	"github.com/fallen-fatalist/snippetbox/internal/repository"
 )
 
-type Server interface {
-	// Endpoints
+type Application interface {
+	// Endpoints for handling
 	Home(w http.ResponseWriter, r *http.Request)
 	SnippetCreate(w http.ResponseWriter, r *http.Request)
 	SnippetView(w http.ResponseWriter, r *http.Request)
@@ -21,5 +21,5 @@ type Server interface {
 	// Logger
 	Logger() *slog.Logger
 	// Database
-	DB() *sql.DB
+	SnippetRepository() *repository.SnippetRepository
 }
