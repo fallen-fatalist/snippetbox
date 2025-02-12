@@ -5,9 +5,8 @@ import (
 	"errors"
 
 	"github.com/fallen-fatalist/snippetbox/internal/entities"
+	"github.com/fallen-fatalist/snippetbox/internal/repository"
 )
-
-var ErrNilDB = errors.New("nil database provided to repository")
 
 type snippetRepository struct {
 	db *sql.DB
@@ -15,7 +14,7 @@ type snippetRepository struct {
 
 func NewSnippetRepository(db *sql.DB) (*snippetRepository, error) {
 	if db == nil {
-		return nil, ErrNilDB
+		return nil, repository.ErrNilDB
 	}
 	return &snippetRepository{
 		db: db,
@@ -45,9 +44,54 @@ func (r *snippetRepository) Insert(title, content string, expires int) (snippetI
 }
 
 func (r *snippetRepository) Get(snippetID int64) (entities.Snippet, error) {
-	return entities.Snippet{}, nil
+	query := `
+		SELECT snippet_id, title, content, created, expires 
+		FROM snippets
+		WHERE expires > NOW() AND snippet_id = $1`
+
+	row := r.db.QueryRow(query, snippetID)
+
+	var snippet entities.Snippet
+	err := row.Scan(&snippet.ID, &snippet.Title, &snippet.Content, &snippet.Created, &snippet.Expires)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return snippet, repository.ErrNoRecord
+		} else {
+			return snippet, err
+		}
+	}
+	return snippet, nil
 }
 
-func (r *snippetRepository) Latest() ([]entities.Snippet, error) {
-	return nil, nil
+func (r *snippetRepository) Latest(count int) ([]entities.Snippet, error) {
+	query := `
+		SELECT snippet_id, title, content, created, expires 
+		FROM snippets
+		WHERE expires > NOW() 
+		ORDER BY snippet_id DESC LIMIT $1
+	`
+
+	rows, err := r.db.Query(query, count)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var snippets []entities.Snippet
+
+	for rows.Next() {
+		var snippet entities.Snippet
+
+		err = rows.Scan(&snippet.ID, &snippet.Title, &snippet.Content, &snippet.Created, &snippet.Expires)
+		if err != nil {
+			return nil, err
+		}
+
+		snippets = append(snippets, snippet)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return snippets, nil
 }
