@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"log/slog"
 	"time"
 )
 
@@ -33,9 +34,8 @@ func OpenDB(dsn string) (*sql.DB, error) {
 			// 	slog.Info("PostgreSQL database connection established")
 			// 	return postgresDB, nil
 			// }
-			if err != nil {
-				db.Close()
-				return nil, err
+			if err == nil {
+				return db, nil
 			}
 		}
 
@@ -45,5 +45,6 @@ func OpenDB(dsn string) (*sql.DB, error) {
 	}
 
 	// Return the sql.DB connection pool.
-	return db, nil
+	slog.Error("Failed to connect to PostgreSQL", "attempts", maxRetries, "interval", retryInterval, "error", err)
+	return nil, err
 }
