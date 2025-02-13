@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"html/template"
+	"net/http"
 	"path/filepath"
 	"time"
 
@@ -14,7 +15,7 @@ type templateData struct {
 	Snippet     entities.Snippet
 }
 
-func NewTemplateData() templateData {
+func NewTemplateData(r *http.Request) templateData {
 	return templateData{
 		CurrentYear: time.Now().Year(),
 	}

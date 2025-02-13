@@ -26,7 +26,7 @@ func (app *application) Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := NewTemplateData()
+	data := NewTemplateData(r)
 	data.Snippets = snippets
 
 	app.render(w, r, http.StatusOK, homePage, data)
@@ -51,7 +51,7 @@ func (app *application) SnippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := NewTemplateData()
+	data := NewTemplateData(r)
 	data.Snippet = snippet
 
 	app.render(w, r, http.StatusOK, viewPage, data)
@@ -61,22 +61,37 @@ func (app *application) SnippetView(w http.ResponseWriter, r *http.Request) {
 var ErrMethodNotAllowed = errors.New("http method not allowed")
 
 func (app *application) SnippetCreate(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-	}
 	switch r.Method {
 	case http.MethodPost:
-		title := "O snail"
-		content := "O snail\nClimb Mount Fuji,\nBut slowly, slowly!\n\n– Kobayashi Issa"
-		expires := 7
+
+		r.Body = http.MaxBytesReader(w, r.Body, 4096)
+
+		err := r.ParseForm()
+		if err != nil {
+			app.clientError(w, err, http.StatusBadRequest)
+			return
+		}
+
+		title := r.PostForm.Get("title")
+		content := r.PostForm.Get("content")
+
+		expires, err := strconv.Atoi(r.PostForm.Get("expires"))
+		if err != nil {
+			app.clientError(w, err, http.StatusBadRequest)
+			return
+		}
 
 		snippetID, err := app.Service().SnippetService().CreateSnippet(title, content, expires)
 		if err != nil {
 			app.serverError(w, r, err)
+			return
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/snippet/view?id=%d", snippetID), http.StatusSeeOther)
+		http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", snippetID), http.StatusSeeOther)
 	case http.MethodGet:
-		w.Write([]byte("Display the form for creating a new snippet..."))
+		data := NewTemplateData(r)
+
+		app.render(w, r, http.StatusOK, "create.html", data)
 	default:
 		w.Header().Set("Allow", http.MethodPost)
 		app.clientError(w, ErrMethodNotAllowed, http.StatusMethodNotAllowed)
