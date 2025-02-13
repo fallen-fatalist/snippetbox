@@ -5,7 +5,10 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/alexedwards/scs/postgresstore"
+	"github.com/alexedwards/scs/v2"
 	"github.com/fallen-fatalist/snippetbox/internal/config"
 	"github.com/fallen-fatalist/snippetbox/internal/repository"
 	"github.com/fallen-fatalist/snippetbox/internal/repository/postgres"
@@ -41,6 +44,11 @@ func Run() {
 	defer db.Close()
 	logger.Info("Database connected successfully")
 
+	// Session manager
+	sessionManager := scs.New()
+	sessionManager.Store = postgresstore.New(db)
+	sessionManager.Lifetime = 1 * time.Minute
+
 	// Initialize the repositories
 	var snippetRepositoryInstance repository.SnippetRepository
 	snippetRepositoryInstance, err = postgres.NewSnippetRepository(db)
@@ -70,13 +78,20 @@ func Run() {
 		cfg,
 		generalService,
 		cache,
+		sessionManager,
 	)
+
+	// Prepare server
+	srv := http.Server{
+		Addr:     ":" + app.Config().Port(),
+		Handler:  app.Routes(),
+		ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError),
+	}
 
 	// Log server start
 	logger.Info("Application successfully started", slog.Any("address", app.Config().Port()))
 
-	// Launch server
-	err = http.ListenAndServe(":"+app.Config().Port(), app.Routes())
+	err = srv.ListenAndServe()
 
 	// In case of error server start log it
 	logger.Error(err.Error())
