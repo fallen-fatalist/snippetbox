@@ -11,9 +11,9 @@ func (app *application) Routes() http.Handler {
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
 	// Endpoints
-	mux.HandleFunc("/", app.Home)
-	mux.HandleFunc("/snippet/view/{id}", app.SnippetView)
-	mux.HandleFunc("/snippet/create", app.SnippetCreate)
+	mux.Handle("/", app.sessionManager.LoadAndSave(http.HandlerFunc(app.Home)))
+	mux.Handle("/snippet/view/{id}", app.sessionManager.LoadAndSave(http.HandlerFunc(app.SnippetView)))
+	mux.Handle("/snippet/create", app.sessionManager.LoadAndSave(http.HandlerFunc(app.SnippetCreate)))
 
 	// Middlewares
 	// The request flow goes from bottom to up

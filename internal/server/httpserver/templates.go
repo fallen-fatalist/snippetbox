@@ -14,6 +14,7 @@ type templateData struct {
 	Snippets    []entities.Snippet
 	Snippet     entities.Snippet
 	Form        interface{}
+	Flash       string
 }
 
 func NewTemplateData(r *http.Request) templateData {
