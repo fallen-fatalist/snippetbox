@@ -9,6 +9,7 @@ import (
 
 type Service interface {
 	SnippetService() SnippetService
+	UserService() UserService
 }
 
 type SnippetService interface {
@@ -18,6 +19,12 @@ type SnippetService interface {
 	CreateSnippet(title, content string, expires int) (int64, Validator)
 	// Returns last n snippets
 	LatestSnippets(n int) ([]entities.Snippet, error)
+}
+
+type UserService interface {
+	CreateUser(name, email, password string) error
+	Authenticate(email, password string) (int, error)
+	Exists(userID int) (bool, error)
 }
 
 // Constants
@@ -45,15 +52,26 @@ var (
 	ErrExceedMaximumContentLength      = fmt.Errorf("content length exceed maximum %d content length", MaximumContentLength)
 	ErrNegativeNumberLastSnippets      = fmt.Errorf("negative number of last snippets provided")
 	ErrExceedMaximumLastSnippetsNumber = fmt.Errorf("last snippets number exceed maximum %d last snippets number", MaximumLastSnippetsNumber)
+
+	// User errors
+	ErrNoUser             = errors.New("no matching user found")
+	ErrInvalidCredentials = errors.New("invalid credentials")
+	ErrDuplicateEmail     = errors.New("duplicate email")
 )
 
 var serviceErrors = []error{
 	ErrNegativeID,
 	ErrNegativeExpiresDay,
 	ErrExceedMaximumExpiresDays,
+	ErrBlankTitle,
 	ErrExceedMaximumTitleLength,
+	ErrBlankContent,
 	ErrExceedMaximumContentLength,
 	ErrNegativeNumberLastSnippets,
+	ErrExceedMaximumLastSnippetsNumber,
+	ErrNoUser,
+	ErrInvalidCredentials,
+	ErrDuplicateEmail,
 }
 
 func IsServiceError(err error) bool {

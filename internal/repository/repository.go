@@ -12,6 +12,11 @@ type SnippetRepository interface {
 	Latest(int) ([]entities.Snippet, error)
 }
 
+type UserRepository interface {
+	Insert(name, email, password string) (userID int, err error)
+	Get(email string) (entities.User, error)
+}
+
 var (
 	ErrNilDB    = errors.New("nil database provided to repository")
 	ErrNoRecord = errors.New("empty record fetched from database")

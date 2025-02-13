@@ -22,7 +22,7 @@ import (
 )
 
 // Actual main
-func Run() {
+func Main() {
 	// Initialize logger
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
@@ -57,6 +57,12 @@ func Run() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	var userRepositoryInstance repository.UserRepository
+	userRepositoryInstance, err = postgres.NewUserRepository(db)
+	if err != nil {
+		log.Fatal(err)
+	}
 	logger.Info("Repositories initialized successfully")
 
 	// Initialize the services
@@ -64,11 +70,20 @@ func Run() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	userServiceInstance, err := serviceinstance.NewUserService(userRepositoryInstance)
+	if err != nil {
+		log.Fatal(err)
+	}
 	logger.Info("Services initialized successfully")
 
 	// Initialize general service
 	var generalService service.Service
-	generalService, err = serviceinstance.NewService(snippetServiceInstance)
+	generalService, err = serviceinstance.NewService(
+		snippetServiceInstance,
+		userServiceInstance,
+	)
+
 	if err != nil {
 		log.Fatal(err)
 	}
