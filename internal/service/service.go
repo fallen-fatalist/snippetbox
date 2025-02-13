@@ -15,13 +15,14 @@ type SnippetService interface {
 	GetSnippetByID(id int64) (entities.Snippet, error)
 	// Expires is the number of days, in which snippet will be expired
 	// Returns id of created snippet and the name of the field matched its corresponding error
-	CreateSnippet(title, content string, expires int) (int64, map[string]error)
+	CreateSnippet(title, content string, expires int) (int64, Validator)
 	// Returns last n snippets
 	LatestSnippets(n int) ([]entities.Snippet, error)
 }
 
 // Constants
 var (
+	MinimumExpiresDays        = 1
 	MaximumExpiresDays        = 365
 	MaximumTitleLength        = 100
 	MaximumContentLength      = 10000

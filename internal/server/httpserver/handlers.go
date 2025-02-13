@@ -84,15 +84,15 @@ func (app *application) SnippetCreate(w http.ResponseWriter, r *http.Request) {
 			Expires: expires,
 		}
 
-		snippetID, errs := app.Service().SnippetService().CreateSnippet(form.Title, form.Content, form.Expires)
-		if err, ok := errs["err"]; ok {
+		snippetID, validator := app.Service().SnippetService().CreateSnippet(form.Title, form.Content, form.Expires)
+		if err, exists := validator.FieldErrors["err"]; exists {
 			app.serverError(w, r, err)
 			return
 		}
 
-		if len(errs) > 0 {
+		if !validator.Valid() {
 			data := NewTemplateData(r)
-			form.FieldErrors = errs
+			form.FieldErrors = validator.FieldErrors
 			data.Form = form
 
 			app.render(w, r, http.StatusUnprocessableEntity, "create.html", data)
