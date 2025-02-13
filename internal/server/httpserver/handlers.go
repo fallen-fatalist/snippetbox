@@ -27,7 +27,7 @@ func (app *application) Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := NewTemplateData(r)
+	data := app.NewTemplateData(r)
 	data.Snippets = snippets
 
 	app.render(w, r, http.StatusOK, homePage, data)
@@ -54,7 +54,7 @@ func (app *application) SnippetView(w http.ResponseWriter, r *http.Request) {
 
 	flash := app.sessionManager.PopString(r.Context(), "flash")
 
-	data := NewTemplateData(r)
+	data := app.NewTemplateData(r)
 	data.Snippet = snippet
 	data.Flash = flash
 
@@ -94,7 +94,7 @@ func (app *application) SnippetCreate(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if !validator.Valid() {
-			data := NewTemplateData(r)
+			data := app.NewTemplateData(r)
 			form.FieldErrors = validator.FieldErrors
 			data.Form = form
 
@@ -106,7 +106,7 @@ func (app *application) SnippetCreate(w http.ResponseWriter, r *http.Request) {
 
 		http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", snippetID), http.StatusSeeOther)
 	case http.MethodGet:
-		data := NewTemplateData(r)
+		data := app.NewTemplateData(r)
 		data.Form = vo.SnippetCreateForm{}
 
 		app.render(w, r, http.StatusOK, "create.html", data)

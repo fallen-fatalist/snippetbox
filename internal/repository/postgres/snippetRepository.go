@@ -45,14 +45,14 @@ func (r *snippetRepository) Insert(title, content string, expires int) (snippetI
 
 func (r *snippetRepository) Get(snippetID int64) (entities.Snippet, error) {
 	query := `
-		SELECT snippet_id, title, content, created, expires 
+		SELECT snippet_id, title, content, created_at, expires 
 		FROM snippets
 		WHERE expires > NOW() AND snippet_id = $1`
 
 	row := r.db.QueryRow(query, snippetID)
 
 	var snippet entities.Snippet
-	err := row.Scan(&snippet.ID, &snippet.Title, &snippet.Content, &snippet.Created, &snippet.Expires)
+	err := row.Scan(&snippet.ID, &snippet.Title, &snippet.Content, &snippet.CreatedAt, &snippet.ExpiresAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return snippet, repository.ErrNoRecord
@@ -65,7 +65,7 @@ func (r *snippetRepository) Get(snippetID int64) (entities.Snippet, error) {
 
 func (r *snippetRepository) Latest(count int) ([]entities.Snippet, error) {
 	query := `
-		SELECT snippet_id, title, content, created, expires 
+		SELECT snippet_id, title, content, created_at, expires 
 		FROM snippets
 		WHERE expires > NOW() 
 		ORDER BY snippet_id DESC LIMIT $1
@@ -82,7 +82,7 @@ func (r *snippetRepository) Latest(count int) ([]entities.Snippet, error) {
 	for rows.Next() {
 		var snippet entities.Snippet
 
-		err = rows.Scan(&snippet.ID, &snippet.Title, &snippet.Content, &snippet.Created, &snippet.Expires)
+		err = rows.Scan(&snippet.ID, &snippet.Title, &snippet.Content, &snippet.CreatedAt, &snippet.ExpiresAt)
 		if err != nil {
 			return nil, err
 		}

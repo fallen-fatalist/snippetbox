@@ -17,9 +17,10 @@ type templateData struct {
 	Flash       string
 }
 
-func NewTemplateData(r *http.Request) templateData {
+func (app *application) NewTemplateData(r *http.Request) templateData {
 	return templateData{
 		CurrentYear: time.Now().Year(),
+		Flash:       app.sessionManager.PopString(r.Context(), "flash"),
 	}
 }
 

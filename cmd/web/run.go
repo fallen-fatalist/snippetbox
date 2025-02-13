@@ -9,6 +9,7 @@ import (
 
 	"github.com/alexedwards/scs/postgresstore"
 	"github.com/alexedwards/scs/v2"
+
 	"github.com/fallen-fatalist/snippetbox/internal/config"
 	"github.com/fallen-fatalist/snippetbox/internal/repository"
 	"github.com/fallen-fatalist/snippetbox/internal/repository/postgres"
@@ -44,10 +45,11 @@ func Run() {
 	defer db.Close()
 	logger.Info("Database connected successfully")
 
+	// TODO: change for gorilla/sessions
 	// Session manager
 	sessionManager := scs.New()
 	sessionManager.Store = postgresstore.New(db)
-	sessionManager.Lifetime = 1 * time.Minute
+	sessionManager.Lifetime = 12 * time.Hour
 
 	// Initialize the repositories
 	var snippetRepositoryInstance repository.SnippetRepository
@@ -91,6 +93,7 @@ func Run() {
 	// Log server start
 	logger.Info("Application successfully started", slog.Any("address", app.Config().Port()))
 
+	// TODO: Change optional TLS server launching
 	err = srv.ListenAndServe()
 
 	// In case of error server start log it

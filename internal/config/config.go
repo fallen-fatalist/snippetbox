@@ -16,6 +16,7 @@ type Config struct {
 		// maxIdleConns
 		// maxIdleTime
 	}
+	// TODO: Cookie lifetime
 }
 
 // Getters
