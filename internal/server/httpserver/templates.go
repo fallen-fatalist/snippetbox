@@ -13,6 +13,7 @@ type templateData struct {
 	CurrentYear int
 	Snippets    []entities.Snippet
 	Snippet     entities.Snippet
+	Form        interface{}
 }
 
 func NewTemplateData(r *http.Request) templateData {

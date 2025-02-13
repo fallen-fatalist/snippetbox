@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/fallen-fatalist/snippetbox/internal/repository"
+	"github.com/fallen-fatalist/snippetbox/internal/server/vo"
 	"github.com/fallen-fatalist/snippetbox/internal/service"
 )
 
@@ -44,7 +45,7 @@ func (app *application) SnippetView(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, repository.ErrNoRecord) {
 			app.notFound(w)
 		} else if service.IsServiceError(err) {
-			app.clientError(w, err, http.StatusBadRequest)
+			app.clientError(w, http.StatusBadRequest)
 		} else {
 			app.serverError(w, r, err)
 		}
@@ -63,38 +64,50 @@ var ErrMethodNotAllowed = errors.New("http method not allowed")
 func (app *application) SnippetCreate(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-
 		r.Body = http.MaxBytesReader(w, r.Body, 4096)
 
 		err := r.ParseForm()
 		if err != nil {
-			app.clientError(w, err, http.StatusBadRequest)
+			app.clientError(w, http.StatusBadRequest)
 			return
 		}
-
-		title := r.PostForm.Get("title")
-		content := r.PostForm.Get("content")
 
 		expires, err := strconv.Atoi(r.PostForm.Get("expires"))
 		if err != nil {
-			app.clientError(w, err, http.StatusBadRequest)
+			app.clientError(w, http.StatusBadRequest)
 			return
 		}
 
-		snippetID, err := app.Service().SnippetService().CreateSnippet(title, content, expires)
-		if err != nil {
+		form := vo.SnippetCreateForm{
+			Title:   r.PostForm.Get("title"),
+			Content: r.PostForm.Get("content"),
+			Expires: expires,
+		}
+
+		snippetID, errs := app.Service().SnippetService().CreateSnippet(form.Title, form.Content, form.Expires)
+		if err, ok := errs["err"]; ok {
 			app.serverError(w, r, err)
+			return
+		}
+
+		if len(errs) > 0 {
+			data := NewTemplateData(r)
+			form.FieldErrors = errs
+			data.Form = form
+
+			app.render(w, r, http.StatusUnprocessableEntity, "create.html", data)
 			return
 		}
 
 		http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", snippetID), http.StatusSeeOther)
 	case http.MethodGet:
 		data := NewTemplateData(r)
+		data.Form = vo.SnippetCreateForm{}
 
 		app.render(w, r, http.StatusOK, "create.html", data)
 	default:
 		w.Header().Set("Allow", http.MethodPost)
-		app.clientError(w, ErrMethodNotAllowed, http.StatusMethodNotAllowed)
+		app.clientError(w, http.StatusMethodNotAllowed)
 		return
 	}
 

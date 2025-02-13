@@ -14,14 +14,15 @@ type Service interface {
 type SnippetService interface {
 	GetSnippetByID(id int64) (entities.Snippet, error)
 	// Expires is the number of days, in which snippet will be expired
-	CreateSnippet(title, content string, expires int) (int64, error)
+	// Returns id of created snippet and the name of the field matched its corresponding error
+	CreateSnippet(title, content string, expires int) (int64, map[string]error)
 	// Returns last n snippets
 	LatestSnippets(n int) ([]entities.Snippet, error)
 }
 
 // Constants
 var (
-	MaximumExpiresDays        = 730
+	MaximumExpiresDays        = 365
 	MaximumTitleLength        = 100
 	MaximumContentLength      = 10000
 	MaximumLastSnippetsNumber = 100
@@ -36,8 +37,10 @@ var (
 	// Snippet erros
 	ErrNegativeID                      = errors.New("negative or zero id provided")
 	ErrNegativeExpiresDay              = errors.New("negative expires day")
-	ErrExceedMaximumDays               = fmt.Errorf("expires day exceed maximum %d days", MaximumExpiresDays)
+	ErrExceedMaximumExpiresDays        = fmt.Errorf("expires day exceed maximum %d days", MaximumExpiresDays)
+	ErrBlankTitle                      = errors.New("blank title provided in snippet")
 	ErrExceedMaximumTitleLength        = fmt.Errorf("title length exceed maximum %d title length", MaximumTitleLength)
+	ErrBlankContent                    = errors.New("blank content provided in snippet")
 	ErrExceedMaximumContentLength      = fmt.Errorf("content length exceed maximum %d content length", MaximumContentLength)
 	ErrNegativeNumberLastSnippets      = fmt.Errorf("negative number of last snippets provided")
 	ErrExceedMaximumLastSnippetsNumber = fmt.Errorf("last snippets number exceed maximum %d last snippets number", MaximumLastSnippetsNumber)
@@ -46,7 +49,7 @@ var (
 var serviceErrors = []error{
 	ErrNegativeID,
 	ErrNegativeExpiresDay,
-	ErrExceedMaximumDays,
+	ErrExceedMaximumExpiresDays,
 	ErrExceedMaximumTitleLength,
 	ErrExceedMaximumContentLength,
 	ErrNegativeNumberLastSnippets,

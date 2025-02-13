@@ -1,6 +1,9 @@
 package serviceinstance
 
 import (
+	"strings"
+	"unicode/utf8"
+
 	"github.com/fallen-fatalist/snippetbox/internal/entities"
 	"github.com/fallen-fatalist/snippetbox/internal/repository"
 	"github.com/fallen-fatalist/snippetbox/internal/service"
@@ -17,19 +20,42 @@ func NewSnippetService(snippetRepository repository.SnippetRepository) (*snippet
 	return &snippetService{repository: snippetRepository}, nil
 }
 
-func (s *snippetService) CreateSnippet(title, content string, expires int) (int64, error) {
-	// Validation
+func (s *snippetService) CreateSnippet(title, content string, expires int) (int64, map[string]error) {
+	errs := map[string]error{}
+	// Expires days validation
 	if expires < 1 {
-		return 0, service.ErrNegativeExpiresDay
+		errs["expires"] = service.ErrNegativeExpiresDay
 	} else if expires > service.MaximumExpiresDays {
-		return 0, service.ErrExceedMaximumDays
-	} else if runes := []rune(title); len(runes) > service.MaximumTitleLength {
-		return 0, service.ErrExceedMaximumTitleLength
-	} else if runes := []rune(content); len(runes) > service.MaximumContentLength {
-		return 0, service.ErrExceedMaximumContentLength
+		errs["expires"] = service.ErrExceedMaximumExpiresDays
 	}
 
-	return s.repository.Insert(title, content, expires)
+	// Trim the space in the title and content
+	title, content = strings.TrimSpace(title), strings.TrimSpace(content)
+
+	// Title validation
+	if title == "" {
+		errs["title"] = service.ErrBlankTitle
+	} else if utf8.RuneCountInString(title) > service.MaximumTitleLength {
+		errs["title"] = service.ErrExceedMaximumTitleLength
+	}
+
+	// Content validation
+	if utf8.RuneCountInString(content) > service.MaximumContentLength {
+		errs["content"] = service.ErrExceedMaximumContentLength
+	} else if content == "" {
+		errs["content"] = service.ErrBlankContent
+	}
+
+	if len(errs) > 0 {
+		return 0, errs
+	}
+
+	snippetID, err := s.repository.Insert(title, content, expires)
+	if err != nil {
+		errs["err"] = err
+		return 0, errs
+	}
+	return snippetID, nil
 }
 
 func (s *snippetService) GetSnippetByID(snippetID int64) (entities.Snippet, error) {

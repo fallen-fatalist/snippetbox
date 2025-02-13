@@ -20,14 +20,14 @@ func (app *application) serverError(w http.ResponseWriter, r *http.Request, err 
 	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 }
 
-func (app *application) clientError(w http.ResponseWriter, err error, status int) {
-	http.Error(w, err.Error(), status)
+func (app *application) clientError(w http.ResponseWriter, status int) {
+	http.Error(w, http.StatusText(status), status)
 }
 
 var ErrPageNotExist = errors.New("page you want to get does not exist")
 
 func (app *application) notFound(w http.ResponseWriter) {
-	app.clientError(w, ErrPageNotExist, http.StatusNotFound)
+	app.clientError(w, http.StatusNotFound)
 }
 
 func (app *application) render(w http.ResponseWriter, r *http.Request, status int, page string, data templateData) {
