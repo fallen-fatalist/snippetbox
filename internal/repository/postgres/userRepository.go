@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"database/sql"
+	"errors"
 	"strings"
 
 	"github.com/fallen-fatalist/snippetbox/internal/entities"
@@ -47,5 +48,22 @@ func (r *userRepository) Insert(name, email, hashedPassword string) (userID int,
 }
 
 func (r *userRepository) Get(email string) (entities.User, error) {
-	return entities.User{}, nil
+	query := `
+			SELECT user_id, name, email, hashed_password, created_at 
+			FROM users
+			WHERE email = $1
+		`
+
+	var user entities.User
+
+	err := r.db.QueryRow(query, email).Scan(&user.ID, &user.Name, &user.Email, &user.HashedPassword, &user.CreatedAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return entities.User{}, service.ErrInvalidCredentials
+		} else {
+			return entities.User{}, err
+		}
+
+	}
+	return user, nil
 }
