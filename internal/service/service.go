@@ -24,7 +24,7 @@ type SnippetService interface {
 
 type UserService interface {
 	CreateUser(name, email, password string) (int, Validator)
-	Authenticate(email, password string) (int, error)
+	Authenticate(email, password string) (int, Validator)
 	Exists(userID int) (bool, error)
 }
 
@@ -61,7 +61,6 @@ var (
 	ErrNoUser             = errors.New("no matching user found")
 	ErrInvalidCredentials = errors.New("invalid credentials")
 	ErrDuplicateEmail     = errors.New("duplicate email")
-	ErrBlankName          = errors.New("blank name for user provided")
 	ErrBlankEmail         = errors.New("blank email for user provided")
 	ErrBlankPassword      = errors.New("blank password for user provided")
 	ErrInvalidEmailFormat = errors.New("incorrect format of email provided")
@@ -87,12 +86,12 @@ var serviceErrors = []error{
 	// User errors
 	ErrNoUser,
 	ErrDuplicateEmail,
-	ErrBlankName,
 	ErrBlankEmail,
 	ErrBlankPassword,
 	ErrInvalidEmailFormat,
 	ErrShortPassword,
 	ErrWhileHashing,
+	ErrInvalidCredentials,
 }
 
 func IsServiceError(err error) bool {

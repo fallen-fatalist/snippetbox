@@ -25,9 +25,7 @@ func (s *userService) CreateUser(name, email, password string) (int, service.Val
 	validator := service.Validator{FieldErrors: map[string]error{}}
 
 	// Blank values check
-	validator.CheckField(validator.NotBlank(name), "name", service.ErrBlankName)
-	validator.CheckField(validator.NotBlank(email), "name", service.ErrBlankName)
-	validator.CheckField(validator.NotBlank(password), "password", service.ErrBlankPassword)
+	validator.CheckField(validator.NotBlank(email), "name", service.ErrBlankEmail)
 
 	// Email match the format
 	validator.CheckField(validator.Matches(email, service.EmailRegex), "email", service.ErrInvalidEmailFormat)
@@ -61,8 +59,42 @@ func (s *userService) CreateUser(name, email, password string) (int, service.Val
 	return 0, validator
 }
 
-func (s *userService) Authenticate(email, password string) (int, error) {
-	return 0, nil
+func (s *userService) Authenticate(email, password string) (int, service.Validator) {
+	validator := service.Validator{
+		FieldErrors:    map[string]error{},
+		NonFieldErrors: []error{},
+	}
+
+	// Email match the format
+	validator.CheckField(validator.Matches(email, service.EmailRegex), "email", service.ErrInvalidEmailFormat)
+
+	// Password requirements
+	validator.CheckField(validator.MinChars(password, service.MinimumPasswordLength), "password", service.ErrShortPassword)
+
+	if !validator.Valid() {
+		return 0, validator
+	}
+
+	user, err := s.repository.Get(email)
+	if err != nil {
+		if errors.Is(err, service.ErrInvalidCredentials) {
+			validator.AddNonFieldError(err)
+		} else {
+			validator.AddFieldError("err", err)
+		}
+		return 0, validator
+
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(password))
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			validator.AddNonFieldError(service.ErrInvalidCredentials)
+		} else {
+			validator.AddFieldError("err", err)
+		}
+		return 0, validator
+	}
+	return user.ID, service.Validator{}
 }
 
 func (s *userService) Exists(userID int) (bool, error) {
