@@ -7,11 +7,12 @@ import (
 )
 
 type Validator struct {
-	FieldErrors map[string]error
+	NonFieldErrors []error
+	FieldErrors    map[string]error
 }
 
 func (v *Validator) Valid() bool {
-	return len(v.FieldErrors) == 0
+	return len(v.FieldErrors) == 0 && len(v.NonFieldErrors) == 0
 }
 
 func (v *Validator) AddFieldError(key string, err error) {
@@ -22,6 +23,10 @@ func (v *Validator) AddFieldError(key string, err error) {
 	if _, exists := v.FieldErrors[key]; !exists {
 		v.FieldErrors[key] = err
 	}
+}
+
+func (v *Validator) AddNonFieldError(err error) {
+	v.NonFieldErrors = append(v.NonFieldErrors, err)
 }
 
 func (v *Validator) CheckField(ok bool, key string, err error) {

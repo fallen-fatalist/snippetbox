@@ -6,3 +6,10 @@ type UserSignupForm struct {
 	Password    string
 	FieldErrors map[string]error
 }
+
+type UserLoginForm struct {
+	Email          string
+	Password       string
+	FieldErrors    map[string]error
+	NonFieldErrors []error
+}

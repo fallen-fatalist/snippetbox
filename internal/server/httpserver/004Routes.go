@@ -13,12 +13,12 @@ func (app *application) Routes() http.Handler {
 	// Snippet Endpoints
 	mux.Handle("/", app.sessionManager.LoadAndSave(http.HandlerFunc(app.Home)))
 	mux.Handle("/snippet/view/{id}", app.sessionManager.LoadAndSave(http.HandlerFunc(app.SnippetView)))
-	mux.Handle("/snippet/create", app.sessionManager.LoadAndSave(http.HandlerFunc(app.SnippetCreate)))
+	mux.Handle("/snippet/create", app.sessionManager.LoadAndSave(app.requireAuthentication(http.HandlerFunc(app.SnippetCreate))))
 
 	// User Endpoints
 	mux.Handle("/user/signup", app.sessionManager.LoadAndSave(http.HandlerFunc(app.UserSignup)))
-	mux.Handle("/user/login", app.sessionManager.LoadAndSave(http.HandlerFunc(app.UserSignup)))
-	mux.Handle("/user/logout", app.sessionManager.LoadAndSave(http.HandlerFunc(app.UserSignup)))
+	mux.Handle("/user/login", app.sessionManager.LoadAndSave(http.HandlerFunc(app.UserLogin)))
+	mux.Handle("/user/logout", app.sessionManager.LoadAndSave(app.requireAuthentication(http.HandlerFunc(app.UserLogout))))
 
 	// Middlewares
 	// The request flow goes from bottom to up
