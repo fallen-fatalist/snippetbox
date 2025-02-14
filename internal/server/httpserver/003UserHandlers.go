@@ -7,6 +7,12 @@ import (
 )
 
 func (app *application) UserSignup(w http.ResponseWriter, r *http.Request) {
+	if app.isAuthenticated(r) {
+		app.sessionManager.Put(r.Context(), "flash", "User already logged in!")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
 	switch r.Method {
 	case http.MethodPost:
 		r.Body = http.MaxBytesReader(w, r.Body, 4096)
@@ -55,6 +61,12 @@ func (app *application) UserSignup(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) UserLogin(w http.ResponseWriter, r *http.Request) {
+	if app.isAuthenticated(r) {
+		app.sessionManager.Put(r.Context(), "flash", "User already logged in!")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
 	switch r.Method {
 	case http.MethodGet:
 		data := app.NewTemplateData(r)
