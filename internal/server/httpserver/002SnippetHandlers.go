@@ -40,7 +40,7 @@ func (app *application) SnippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	snippet, err := app.Service().SnippetService().GetSnippetByID(int64(id))
+	snippet, err := app.Service().SnippetService().GetSnippetByID(id)
 	if err != nil {
 		if errors.Is(err, repository.ErrNoRecord) {
 			app.notFound(w)
@@ -111,7 +111,7 @@ func (app *application) SnippetCreate(w http.ResponseWriter, r *http.Request) {
 
 		app.render(w, r, http.StatusOK, "create.html", data)
 	default:
-		w.Header().Set("Allow", http.MethodPost)
+		w.Header().Set("Allow", http.MethodPost+""+http.MethodGet)
 		app.clientError(w, http.StatusMethodNotAllowed)
 		return
 	}
