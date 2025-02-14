@@ -21,7 +21,7 @@ func NewSnippetRepository(db *sql.DB) (*snippetRepository, error) {
 	}, nil
 }
 
-func (r *snippetRepository) Insert(title, content string, expires int) (snippetID int64, err error) {
+func (r *snippetRepository) Insert(title, content string, expires int) (snippetID int, err error) {
 	query := `
 		INSERT INTO snippets 
 		(title, content, expires)
@@ -43,7 +43,7 @@ func (r *snippetRepository) Insert(title, content string, expires int) (snippetI
 	return snippetID, nil
 }
 
-func (r *snippetRepository) Get(snippetID int64) (entities.Snippet, error) {
+func (r *snippetRepository) Get(snippetID int) (entities.Snippet, error) {
 	query := `
 		SELECT snippet_id, title, content, created_at, expires 
 		FROM snippets

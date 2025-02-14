@@ -19,10 +19,9 @@ func NewSnippetService(snippetRepository repository.SnippetRepository) (*snippet
 	return &snippetService{repository: snippetRepository}, nil
 }
 
-func (s *snippetService) CreateSnippet(title, content string, expires int) (int64, service.Validator) {
-	validator := service.Validator{
-		FieldErrors: map[string]error{},
-	}
+func (s *snippetService) CreateSnippet(title, content string, expires int) (int, service.Validator) {
+	validator := service.Validator{FieldErrors: map[string]error{}}
+
 	// Expires days validation
 	validator.CheckField(validator.MinValue(expires, service.MinimumExpiresDays), "expires", service.ErrNegativeExpiresDay)
 	validator.CheckField(validator.MaxValue(expires, service.MaximumExpiresDays), "expires", service.ErrExceedMaximumExpiresDays)
@@ -50,9 +49,9 @@ func (s *snippetService) CreateSnippet(title, content string, expires int) (int6
 	return snippetID, validator
 }
 
-func (s *snippetService) GetSnippetByID(snippetID int64) (entities.Snippet, error) {
+func (s *snippetService) GetSnippetByID(snippetID int) (entities.Snippet, error) {
 	if snippetID < 1 {
-		return entities.Snippet{}, service.ErrNegativeID
+		return entities.Snippet{}, service.ErrNegativeSnippetID
 	}
 
 	snippet, err := s.repository.Get(snippetID)
