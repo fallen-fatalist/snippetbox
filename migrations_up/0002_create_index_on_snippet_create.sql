@@ -1,1 +1,1 @@
-CREATE INDEX idx_snippets_created ON snippets(created);
+CREATE INDEX idx_snippets_created ON snippets(created_at);
