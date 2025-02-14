@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"regexp"
 
 	"github.com/fallen-fatalist/snippetbox/internal/entities"
 )
@@ -13,16 +14,16 @@ type Service interface {
 }
 
 type SnippetService interface {
-	GetSnippetByID(id int64) (entities.Snippet, error)
+	GetSnippetByID(id int) (entities.Snippet, error)
 	// Expires is the number of days, in which snippet will be expired
 	// Returns id of created snippet and the name of the field matched its corresponding error
-	CreateSnippet(title, content string, expires int) (int64, Validator)
+	CreateSnippet(title, content string, expires int) (int, Validator)
 	// Returns last n snippets
 	LatestSnippets(n int) ([]entities.Snippet, error)
 }
 
 type UserService interface {
-	CreateUser(name, email, password string) error
+	CreateUser(name, email, password string) (int, Validator)
 	Authenticate(email, password string) (int, error)
 	Exists(userID int) (bool, error)
 }
@@ -34,6 +35,9 @@ var (
 	MaximumTitleLength        = 100
 	MaximumContentLength      = 10000
 	MaximumLastSnippetsNumber = 100
+
+	MinimumPasswordLength = 8
+	HashedPasswordLength  = 60
 )
 
 // Errors
@@ -43,7 +47,7 @@ var (
 	ErrNilService    = errors.New("nil service provided to general service")
 
 	// Snippet erros
-	ErrNegativeID                      = errors.New("negative or zero id provided")
+	ErrNegativeSnippetID               = errors.New("negative or zero snippet id provided")
 	ErrNegativeExpiresDay              = errors.New("negative expires day")
 	ErrExceedMaximumExpiresDays        = fmt.Errorf("expires day exceed maximum %d days", MaximumExpiresDays)
 	ErrBlankTitle                      = errors.New("blank title provided in snippet")
@@ -57,10 +61,21 @@ var (
 	ErrNoUser             = errors.New("no matching user found")
 	ErrInvalidCredentials = errors.New("invalid credentials")
 	ErrDuplicateEmail     = errors.New("duplicate email")
+	ErrBlankName          = errors.New("blank name for user provided")
+	ErrBlankEmail         = errors.New("blank email for user provided")
+	ErrBlankPassword      = errors.New("blank password for user provided")
+	ErrInvalidEmailFormat = errors.New("incorrect format of email provided")
+	ErrShortPassword      = errors.New("password is too short, must be longer than 7 characters")
+	ErrWhileHashing       = errors.New("error occured while hashing")
+)
+
+var (
+	EmailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 )
 
 var serviceErrors = []error{
-	ErrNegativeID,
+	// SnippetErrors
+	ErrNegativeSnippetID,
 	ErrNegativeExpiresDay,
 	ErrExceedMaximumExpiresDays,
 	ErrBlankTitle,
@@ -69,9 +84,15 @@ var serviceErrors = []error{
 	ErrExceedMaximumContentLength,
 	ErrNegativeNumberLastSnippets,
 	ErrExceedMaximumLastSnippetsNumber,
+	// User errors
 	ErrNoUser,
-	ErrInvalidCredentials,
 	ErrDuplicateEmail,
+	ErrBlankName,
+	ErrBlankEmail,
+	ErrBlankPassword,
+	ErrInvalidEmailFormat,
+	ErrShortPassword,
+	ErrWhileHashing,
 }
 
 func IsServiceError(err error) bool {

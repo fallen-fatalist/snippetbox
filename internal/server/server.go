@@ -9,10 +9,15 @@ import (
 )
 
 type Application interface {
-	// Endpoints for handling
+	// Snippet Endpoints
 	Home(w http.ResponseWriter, r *http.Request)
 	SnippetCreate(w http.ResponseWriter, r *http.Request)
 	SnippetView(w http.ResponseWriter, r *http.Request)
+
+	// User endpoints
+	UserSignup(w http.ResponseWriter, r *http.Request)
+	UserLogin(w http.ResponseWriter, r *http.Request)
+	UserLogout(w http.ResponseWriter, r *http.Request)
 
 	// Config
 	Config() *config.Config

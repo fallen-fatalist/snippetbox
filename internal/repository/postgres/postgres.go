@@ -7,6 +7,12 @@ import (
 	"time"
 )
 
+// Error Codes
+const (
+	UniqueViolationErrorCode = "23505"
+	CheckViolationErrorCode  = "23514"
+)
+
 // Initialize the PostgreSQL database
 func OpenDB(dsn string) (*sql.DB, error) {
 

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"regexp"
 	"strings"
 	"unicode/utf8"
 )
@@ -47,4 +48,8 @@ func (v *Validator) MinValue(value, n int) bool {
 
 func (v *Validator) MaxValue(value, n int) bool {
 	return value <= n
+}
+
+func (v *Validator) Matches(value string, regex *regexp.Regexp) bool {
+	return regex.MatchString(value)
 }
