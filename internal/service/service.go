@@ -38,6 +38,8 @@ var (
 
 	MinimumPasswordLength = 8
 	HashedPasswordLength  = 60
+
+	SnippetFormBytesLimit = 16384
 )
 
 // Errors
@@ -50,6 +52,7 @@ var (
 	ErrNegativeSnippetID               = errors.New("negative or zero snippet id provided")
 	ErrNegativeExpiresDay              = errors.New("negative expires day")
 	ErrExceedMaximumExpiresDays        = fmt.Errorf("expires day exceed maximum %d days", MaximumExpiresDays)
+	ErrBlankName                       = errors.New("blank name provided in credentials")
 	ErrBlankTitle                      = errors.New("blank title provided in snippet")
 	ErrExceedMaximumTitleLength        = fmt.Errorf("title length exceed maximum %d title length", MaximumTitleLength)
 	ErrBlankContent                    = errors.New("blank content provided in snippet")
@@ -92,6 +95,7 @@ var serviceErrors = []error{
 	ErrShortPassword,
 	ErrWhileHashing,
 	ErrInvalidCredentials,
+	ErrBlankName,
 }
 
 func IsServiceError(err error) bool {

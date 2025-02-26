@@ -67,7 +67,7 @@ var ErrMethodNotAllowed = errors.New("http method not allowed")
 func (app *application) SnippetCreate(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		r.Body = http.MaxBytesReader(w, r.Body, 4096)
+		r.Body = http.MaxBytesReader(w, r.Body, int64(service.SnippetFormBytesLimit))
 
 		err := r.ParseForm()
 		if err != nil {
