@@ -46,6 +46,7 @@ func Main() {
 	logger.Info("Database connected successfully")
 
 	// TODO: change for gorilla/sessions
+	// TODO: if tls use Secure header enabled
 	// Session manager
 	sessionManager := scs.New()
 	sessionManager.Store = postgresstore.New(db)
@@ -106,10 +107,17 @@ func Main() {
 	}
 
 	// Log server start
-	logger.Info("Application successfully started", slog.Any("address", app.Config().Port()))
+	logger.Info("Application successfully started",
+		slog.Any("address", app.Config().Port()),
+		slog.Any("tls", app.Config().TLS()),
+	)
 
 	// TODO: Change optional TLS server launching
-	err = srv.ListenAndServe()
+	if cfg.TLS() {
+		err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
+	} else {
+		err = srv.ListenAndServe()
+	}
 
 	// In case of error server start log it
 	logger.Error(err.Error())

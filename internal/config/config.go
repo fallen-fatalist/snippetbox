@@ -16,6 +16,7 @@ type Config struct {
 		// maxIdleConns
 		// maxIdleTime
 	}
+	tls bool
 	// TODO: Cookie lifetime
 }
 
@@ -30,6 +31,10 @@ func (c *Config) StaticDir() string {
 
 func (c *Config) DSN() string {
 	return c.db.dsn
+}
+
+func (c *Config) TLS() bool {
+	return c.tls
 }
 
 func MustConfigLoad() *Config {
@@ -47,6 +52,7 @@ func MustConfigLoad() *Config {
 	// Server vars
 	flag.StringVar(&cfg.port, "port", "4000", "Server port")
 	flag.StringVar(&cfg.staticDir, "static-dir", "./ui/static/", "Path to the static assets directory")
+	flag.BoolVar(&cfg.tls, "tls", false, "Enables TLS, certificate and key must lie in /tls directory corresponding: /tls/cert.pem and /tls/key.pem")
 
 	// Database vars
 	cfg.db.dsn = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", dbUser, dbPassword, dbHost, dbPort, dbName)
