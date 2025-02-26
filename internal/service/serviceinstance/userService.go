@@ -25,7 +25,7 @@ func (s *userService) CreateUser(name, email, password string) (int, service.Val
 	validator := service.Validator{FieldErrors: map[string]error{}}
 
 	// Blank values check
-	validator.CheckField(validator.NotBlank(email), "name", service.ErrBlankEmail)
+	validator.CheckField(validator.NotBlank(name), "name", service.ErrBlankName)
 
 	// Email match the format
 	validator.CheckField(validator.Matches(email, service.EmailRegex), "email", service.ErrInvalidEmailFormat)
